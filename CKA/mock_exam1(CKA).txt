@@ -1,0 +1,217 @@
+**Q. how many pods exist on the system ?** 
+
+```bash
+kubectl get pod  (pod 를 조회 해주세요~)
+```
+
+**Q.** Create a new pod with the `nginx` image.
+
+```bash
+kubectl run my-nginx --image=nginx
+# kubectl get pods --namespace default
+#kubectl describe pod nginx=pod
+```
+
+**Q.** What is the image used to create the new pods?
+
+```bash
+ kubectl describe pod newpods
+```
+
+**Q.** Deploy a pod named `nginx-pod` using the `nginx:alpine` image.
+
+```bash
+kubectl run nginx-pod --image=nginx:alpine
+```
+
+ **Q.Deploy a messaging pod using the redis:alpine image with the labels set to tier=msg.**
+
+```bash
+kubectl run messaging --image=redis:alpine --labels=tier=msg
+#kubectl run --help (기억 안날때)
+#kubectl get pod (확인)
+```
+
+ **Q.**Create a namespace named `apx-x9984574`.
+
+```bash
+kubectl create namespace apx-x9984574
+```
+
+ **Q.**Get the list of nodes in JSON format and store it in a file at `/opt/outputs/nodes-z3444kd9.json`.
+
+```bash
+kubectl get nodes -o json > /opt/outputs/nodes-z3444kd9.json
+#해당 경로에 node list를 저장 
+```
+
+ **Q.**Create a service `messaging-service` to expose the `messaging` application within the cluster on port `6379`.
+
+Use imperative commands.
+
+```bash
+kubectl expose pod messaging --port=6379 --name messaging-service
+
+#messaging pod를 이용해 서비스 만드는것 
+#kubectl get svc (서비스 확인)
+#kubectl describe svc [서비스 이름]
+#kubectl get pods -o wide
+```
+
+ **Q.**Create a deployment named `hr-web-app` using the image `kodekloud/webapp-color` with `2` replicas.
+
+```bash
+kubectl create deployment  hr-web-app --image=kodekloud/webapp-color --replicas=2
+#배포 확인 kubectl get deploy
+#배포 확인 kubectl describe deploy [배포 이름]
+```
+
+ **Q.**Create a static pod named `static-busybox` on the controlplane node that uses the `busybox` image and the command `sleep 1000`.
+
+```bash
+kubectl run --image=busybox static-busybox --dry-run=client -oyaml --command -- sleep 1000 > static-busybox.yaml
+
+#확인 cat static-busybox.yaml
+
+mv static-busybox.yaml /etc/kubernetes/manifests/
+```
+
+**Static Pod는 쿠버네티스 컨트롤 플레인에 의존하지 않는 파드를 배포할 때 사용하면 된다.**
+
+ ****
+
+**Q.**Create a POD in the `finance` namespace named `temp-bus` with the image `redis:alpine`.
+
+```bash
+kubectl run temp-bus --image=redis:alpine --namespace=finance --restart=Never
+
+#namespace에서 실행하면 된다. 
+#확인 kubectl get pod -n fianace
+```
+
+**Q.**A new application `orange` is deployed. There is something wrong with it. Identify and fix the issue.
+
+To know more details of `orange` pod:
+
+```
+kubectl describe pod orange
+
+#Status init: CrashLoopBackoff (내부 작동하는 과정이 출동할 때 발생)
+
+kubectl logs orange init-myservice  (init-myservice 로그 확인)
+
+kubectl edit pod orange (orange pod 수정)
+
+kubectl replace --force -f 경로 (기존것 삭제하고 새로 수정한 yaml 파일로 교체) 
+```
+
+and look under the `initContainers` section. There is an issue with the given command.
+
+```
+ Command:
+      sh
+      -c
+      sleeeep 2;
+```
+
+In the above, we need to correct the `sleeeep` command.
+
+To update the pod with an easiest way by running command:
+
+```
+kubectl edit po orange
+```
+
+It's not possible to update the changes in the running pod so after saving the changes. It will create a temporary file in the default location `/tmp/`.
+
+Use that manifest file and replace with the existing pod:
+
+```
+kubectl replace -f /tmp/kubectl-edit-xxxx.yaml --force
+```
+
+Above command will delete the existing pod and will recreate the new pod with latest changes.
+
+ **Q.**Expose the `hr-web-app` created in the previous task as a service named `hr-web-app-service`, accessible on port `30082` on the nodes of the cluster.
+
+The web application listens on port `8080`.
+
+```
+Run the command: kubectl expose deployment hr-web-app --type=NodePort --port=8080 --name=hr-web-app-service --dry-run=client -o yaml > hr-web-app-service.yaml to generate a service definition file.
+
+Now, in generated service definition file add the nodePort field with the given port number under the ports section and create a service.
+```
+
+**Q.**Expose the `hr-web-app` created in the previous task as a service named `hr-web-app-service`, accessible on port `30082` on the nodes of the cluster.
+
+The web application listens on port `8080`.
+
+Run the command:
+
+```
+kubectl expose deploy hr-web-app --name=hr-app-service --type NodePort --port 8080
+
+kubectl get scv
+
+kubectl describe svc hr-wb-app-service
+
+kubectl edit svc hr-web-app-service
+
+#Node port 를  30082로 수정한다. 
+```
+
+**Q.**Use JSON PATH query to retrieve the `osImages` of all the nodes and store it in a file `/opt/outputs/nodes_os_x43kj56.txt`.
+
+The `osImage` are under the `nodeInfo` section under `status` of each node.
+
+```
+#osImage를 저장해야한다. 
+kubectl get nodes
+kubectl get nodes -o json  #전체 문서
+```
+
+```
+Run the command: kubectl get nodes -o jsonpath='{.items[*].status.nodeInfo.osImage}' > /opt/outputs/nodes_os_x43kj56.txt
+```
+
+치트 시트 참조 : https://kubernetes.io/ko/docs/reference/kubectl/cheatsheet/
+
+Q.
+
+Create a `Persistent Volume` with the given specification: -
+
+**Volume name**: `pv-analytics`
+
+**Storage**: `100Mi`
+
+**Access mode**: `ReadWriteMany`
+
+**Host path**: `/pv/data-analytics`
+
+Solution manifest file to create a persistent volume `pv-analytics` as follows:
+
+```
+vi [].yaml 
+```
+
+```yaml
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-analytics
+spec:
+  capacity:
+    storage: 100Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+      path: /pv/data-analytics
+```
+
+(accessModes : ReadOnlyMany, ReadWriteOnce, ReadWriteMany)
+
+[kubectl create -f pv-definition.yaml)
+
+(kubectl descrive pv pv-analytics)
