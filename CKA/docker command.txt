@@ -1,0 +1,55 @@
+```bash
+docker run ubuntu #바로 종료
+
+#현재 컨테이너
+docker ps 
+
+#종료된것 포함 컨테이너
+docker ps -a
+
+docker run ubuntu sleep 5 #슬립되고 종료
+```
+
+```bash
+#Dockerfile안에서 CMD
+CMD command param1
+CMD ["command", "param1"] #배열 형태는 다음 형태로 기입해야한다. 
+
+CMS ["sleep","5"] 
+
+docker build -t ubuntu-sleeper .
+docker run ubuntu-sleeper #5초 Sleep하는 형태
+
+ 
+```
+
+```bash
+#CMD 파라미터 변경
+#ENTRYPOINT 지정하면 sleep 명령어가 실행되고 10만 입력하면된다. 
+
+FROM Ubuntu
+
+ENTRYPOINT ["sleep"]
+
+docker run ubuntu-sleeper 10
+ 
+
+```
+
+```bash
+
+FROM Ubuntu
+
+ENTRYPOINT ["sleep"]
+
+CMD ["5"]
+
+명령어를 입력하지 않아도 기본값 설정됨
+
+#다음과 같이 명령하면 CMD 10으로 바뀜
+docker run ubuntu-sleeper 10
+
+#Entrypoint를 수정하고 싶으면 다음과 같이 수정하면된다.
+docker run --entrypoint sleep2.0 ubuntu-sleeper 10
+
+```
